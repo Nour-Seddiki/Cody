@@ -190,6 +190,7 @@ for epoch in range(EPOCHS if not MAX_STEPS else 10 ** 9):
             t0, tokens_since_log, loss_since_log, steps_since_log = time.time(), 0, 0.0, 0
 
         if step % EVAL_EVERY == 0 or step == total_steps:
+            t_eval = time.time()
             val_loss = evaluate()
             print(f"step {step} | val loss {val_loss:.4f} | val ppl {math.exp(val_loss):.2f}")
             if val_loss < best_val:
@@ -197,7 +198,7 @@ for epoch in range(EPOCHS if not MAX_STEPS else 10 ** 9):
                 model.save_pretrained(OUT_DIR)
                 tokenizer.save_pretrained(OUT_DIR)
                 print(f"saved best adapter -> {OUT_DIR}")
-            t0 = time.time()  # don't count eval time in tok/s
+            t0 += time.time() - t_eval  # don't count eval (or saving) time in tok/s
 
         if step >= total_steps:
             done = True
